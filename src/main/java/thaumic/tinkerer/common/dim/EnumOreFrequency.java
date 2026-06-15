@@ -70,41 +70,4 @@ public enum EnumOreFrequency {
         this.name = name;
         this.freq = freq;
     }
-
-    public static int getSum() {
-        int total = 0;
-        for (EnumOreFrequency e : EnumOreFrequency.values()) {
-            if (e.isValid()) {
-                total += e.freq;
-            }
-        }
-        return total;
-    }
-
-    public static ArrayList<EnumOreFrequency> getValidOres() {
-        ArrayList<EnumOreFrequency> result = new ArrayList<>();
-        for (EnumOreFrequency e : EnumOreFrequency.values()) {
-            if (e.isValid()) {
-                result.add(e);
-            }
-        }
-        return result;
-    }
-
-    public static ItemStack getRandomOre(Random rand) {
-        int randInt = rand.nextInt(getSum());
-
-        for (EnumOreFrequency e : getValidOres()) {
-            randInt -= e.freq;
-            if (randInt < 0) {
-                return OreDictionary.getOres(e.name).get(0);
-            }
-        }
-        return new ItemStack(Blocks.iron_ore);
-    }
-
-    public boolean isValid() {
-        return !Arrays.asList(OreClusterGenerator.blacklist).contains(name) && !OreDictionary.getOres(name).isEmpty()
-                && OreDictionary.getOres(name).get(0).getItem() instanceof ItemBlock;
-    }
 }
