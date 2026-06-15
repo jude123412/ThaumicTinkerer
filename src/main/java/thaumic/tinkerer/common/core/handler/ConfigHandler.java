@@ -12,11 +12,12 @@
 package thaumic.tinkerer.common.core.handler;
 
 import java.io.File;
+import java.util.List;
 
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
-
 import net.minecraftforge.common.config.Property;
+
 import thaumic.tinkerer.common.dim.EnumOreFrequency;
 import thaumic.tinkerer.common.dim.OreClusterGenerator;
 import thaumic.tinkerer.common.dim.OreFrequencyEntry;
@@ -191,57 +192,51 @@ public final class ConfigHandler {
         if (enableKami) {
 
             bedrockDimensionID = config.getInt(
-                "Bedrock dimension id",
-                "general.kami.bedrockdim",
-                -19,
-                -1023,
-                1023,
-                "Set to the dimension id wished for bedrock dimension, or 0 to disable");
+                    "Bedrock dimension id",
+                    "general.kami.bedrockdim",
+                    -19,
+                    -1023,
+                    1023,
+                    "Set to the dimension id wished for bedrock dimension, or 0 to disable");
 
             config.addCustomCategoryComment(
-                "general.kami.bedrockdim.oregen",
-                "Ore generation weights for the Bedrock dimension.\n" + "Higher values = more common.\n"
-                    + "You may add or remove ores here.");
+                    "general.kami.bedrockdim.oregen",
+                    "Ore generation weights for the Bedrock dimension.\n" + "Higher values = more common.\n"
+                            + "You may add or remove ores here.");
 
             // Ensure list is empty before building
             OreFrequencyEntry.ENTRIES.clear();
 
-            // If no entries rebuild from default ores
-            if (config.getCategory("general.kami.bedrockdim.oregen").getOrderedValues().isEmpty()) {
+            String category = "general.kami.bedrockdim.oregen";
+            List<Property> props = config.getCategory(category).getOrderedValues();
+
+            // If no entries, seed defaults into config
+            if (props.isEmpty()) {
                 for (EnumOreFrequency def : EnumOreFrequency.values()) {
-                    Property prop = config.get(
-                        "general.kami.bedrockdim.oregen", // category
-                        def.name, // property name
-                        def.freq // default
-                    );
-
-                    int weight = prop.getInt();
-
-                    OreFrequencyEntry.ENTRIES.add(new OreFrequencyEntry(def.name, weight));
+                    config.get(category, def.name, def.freq);
                 }
+                // Re-read after seeding
+                props = config.getCategory(category).getOrderedValues();
             }
 
-            // Load ores from config
-            for (Property prop : config.getCategory("general.kami.bedrockdim.oregen").getOrderedValues()) {
-                String oreName = prop.getName();
-                int weight = prop.getInt();
-
-                OreFrequencyEntry.ENTRIES.add(new OreFrequencyEntry(oreName, weight));
+            // Load all entries (default or user-defined)
+            for (Property prop : props) {
+                OreFrequencyEntry.ENTRIES.add(new OreFrequencyEntry(prop.getName(), prop.getInt()));
             }
 
             OreClusterGenerator.blacklist = config.getStringList(
-                "Bedrock dimension ore Blacklist",
-                "general.kami.bedrockdim",
-                new String[] { "oreFirestone" },
-                "These ores will not be spawned in the bedrock dimension");
+                    "Bedrock dimension ore Blacklist",
+                    "general.kami.bedrockdim",
+                    new String[] { "oreFirestone" },
+                    "These ores will not be spawned in the bedrock dimension");
 
             OreClusterGenerator.density = config.getInt(
-                "Bedrock Dimension ore density",
-                "general.kami.bedrockdim",
-                1,
-                0,
-                1023,
-                "The number of vertical veins of ore per chunk. Default: 1");
+                    "Bedrock Dimension ore density",
+                    "general.kami.bedrockdim",
+                    1,
+                    0,
+                    1023,
+                    "The number of vertical veins of ore per chunk. Default: 1");
 
             showPlacementMirrorBlocks = config.getBoolean(
                     "placementMirror.blocks.show",
